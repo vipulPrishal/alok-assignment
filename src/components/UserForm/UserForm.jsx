@@ -36,27 +36,132 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
         [name]: "",
       }));
     }
+
+    // Real-time validation for better UX
+    validateField(name, value);
+  };
+
+  const validateField = (fieldName, value) => {
+    let error = "";
+
+    switch (fieldName) {
+      case "firstName":
+        if (!value.trim()) {
+          error = "First name is required";
+        } else if (value.trim().length < 2) {
+          error = "First name must be at least 2 characters long";
+        } else if (value.trim().length > 50) {
+          error = "First name must be less than 50 characters";
+        } else if (!/^[a-zA-Z\s'-]+$/.test(value.trim())) {
+          error =
+            "First name can only contain letters, spaces, hyphens, and apostrophes";
+        }
+        break;
+
+      case "lastName":
+        if (!value.trim()) {
+          error = "Last name is required";
+        } else if (value.trim().length < 2) {
+          error = "Last name must be at least 2 characters long";
+        } else if (value.trim().length > 50) {
+          error = "Last name must be less than 50 characters";
+        } else if (!/^[a-zA-Z\s'-]+$/.test(value.trim())) {
+          error =
+            "Last name can only contain letters, spaces, hyphens, and apostrophes";
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          error = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          error = "Please enter a valid email address";
+        } else if (value.trim().length > 100) {
+          error = "Email must be less than 100 characters";
+        } else if (
+          !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim())
+        ) {
+          error = "Please enter a valid email format (e.g., user@example.com)";
+        }
+        break;
+
+      case "department":
+        if (!value) {
+          error = "Department is required";
+        } else if (
+          !["Engineering", "Marketing", "Sales", "HR", "Finance"].includes(
+            value
+          )
+        ) {
+          error = "Please select a valid department";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    // Only update error if there's an actual error (don't clear on empty)
+    if (error) {
+      setErrors((prev) => ({
+        ...prev,
+        [fieldName]: error,
+      }));
+    }
   };
 
   const validateForm = () => {
     const errors = {};
 
+    // First Name Validation
     if (!formData.firstName.trim()) {
       errors.firstName = "First name is required";
+    } else if (formData.firstName.trim().length < 2) {
+      errors.firstName = "First name must be at least 2 characters long";
+    } else if (formData.firstName.trim().length > 50) {
+      errors.firstName = "First name must be less than 50 characters";
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.firstName.trim())) {
+      errors.firstName =
+        "First name can only contain letters, spaces, hyphens, and apostrophes";
     }
 
+    // Last Name Validation
     if (!formData.lastName.trim()) {
       errors.lastName = "Last name is required";
+    } else if (formData.lastName.trim().length < 2) {
+      errors.lastName = "Last name must be at least 2 characters long";
+    } else if (formData.lastName.trim().length > 50) {
+      errors.lastName = "Last name must be less than 50 characters";
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.lastName.trim())) {
+      errors.lastName =
+        "Last name can only contain letters, spaces, hyphens, and apostrophes";
     }
 
+    // Email Validation
     if (!formData.email.trim()) {
       errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       errors.email = "Please enter a valid email address";
+    } else if (formData.email.trim().length > 100) {
+      errors.email = "Email must be less than 100 characters";
+    } else if (
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+        formData.email.trim()
+      )
+    ) {
+      errors.email =
+        "Please enter a valid email format (e.g., user@example.com)";
     }
 
+    // Department Validation
     if (!formData.department) {
       errors.department = "Department is required";
+    } else if (
+      !["Engineering", "Marketing", "Sales", "HR", "Finance"].includes(
+        formData.department
+      )
+    ) {
+      errors.department = "Please select a valid department";
     }
 
     return errors;
@@ -106,17 +211,32 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
             value={formData.firstName}
             onChange={handleChange}
             required
+            minLength={2}
+            maxLength={50}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.firstName
-                ? "border-red-500"
+                ? "border-red-500 bg-red-50"
                 : isDark
                 ? "bg-gray-700 border-gray-600 text-white"
                 : "bg-white border-gray-300 text-gray-900"
             }`}
-            placeholder="Enter first name"
+            placeholder="Enter first name (2-50 characters)"
           />
           {errors.firstName && (
-            <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+            <div className="mt-1 flex items-center">
+              <svg
+                className="w-4 h-4 text-red-500 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-red-600">{errors.firstName}</p>
+            </div>
           )}
         </div>
 
@@ -136,17 +256,32 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
             value={formData.lastName}
             onChange={handleChange}
             required
+            minLength={2}
+            maxLength={50}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.lastName
-                ? "border-red-500"
+                ? "border-red-500 bg-red-50"
                 : isDark
                 ? "bg-gray-700 border-gray-600 text-white"
                 : "bg-white border-gray-300 text-gray-900"
             }`}
-            placeholder="Enter last name"
+            placeholder="Enter last name (2-50 characters)"
           />
           {errors.lastName && (
-            <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+            <div className="mt-1 flex items-center">
+              <svg
+                className="w-4 h-4 text-red-500 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-red-600">{errors.lastName}</p>
+            </div>
           )}
         </div>
 
@@ -166,17 +301,31 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
             value={formData.email}
             onChange={handleChange}
             required
+            maxLength={100}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.email
-                ? "border-red-500"
+                ? "border-red-500 bg-red-50"
                 : isDark
                 ? "bg-gray-700 border-gray-600 text-white"
                 : "bg-white border-gray-300 text-gray-900"
             }`}
-            placeholder="Enter user email"
+            placeholder="Enter user email (e.g., user@example.com)"
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+            <div className="mt-1 flex items-center">
+              <svg
+                className="w-4 h-4 text-red-500 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-red-600">{errors.email}</p>
+            </div>
           )}
         </div>
 
@@ -197,7 +346,7 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
             required
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
               errors.department
-                ? "border-red-500"
+                ? "border-red-500 bg-red-50"
                 : isDark
                 ? "bg-gray-700 border-gray-600 text-white"
                 : "bg-white border-gray-300 text-gray-900"
@@ -211,14 +360,32 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
             <option value="Finance">Finance</option>
           </select>
           {errors.department && (
-            <p className="mt-1 text-sm text-red-600">{errors.department}</p>
+            <div className="mt-1 flex items-center">
+              <svg
+                className="w-4 h-4 text-red-500 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-red-600">{errors.department}</p>
+            </div>
           )}
         </div>
 
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
           <button
             type="submit"
-            className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200"
+            disabled={Object.keys(errors).length > 0}
+            className={`flex-1 py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-200 ${
+              Object.keys(errors).length > 0
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                : "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500"
+            }`}
           >
             {user ? "Update User" : "Add User"}
           </button>

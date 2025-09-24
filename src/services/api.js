@@ -33,6 +33,27 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error("API Error:", error.response?.data || error.message);
+
+    // Enhanced error handling
+    if (error.code === "NETWORK_ERROR" || !error.response) {
+      error.message =
+        "Network error. Please check your internet connection and try again.";
+    } else if (error.response.status === 404) {
+      error.message =
+        "Resource not found. The requested data may have been moved or deleted.";
+    } else if (error.response.status === 500) {
+      error.message = "Server error. Please try again later.";
+    } else if (error.response.status === 429) {
+      error.message = "Too many requests. Please wait a moment and try again.";
+    } else if (error.response.status >= 400 && error.response.status < 500) {
+      error.message = "Invalid request. Please check your input and try again.";
+    } else {
+      error.message =
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred.";
+    }
+
     return Promise.reject(error);
   }
 );
@@ -156,12 +177,24 @@ export const updateUser = async (id, userData) => {
 
 export const deleteUser = async (id) => {
   try {
-    // Simulate API call (DummyJSON doesn't support DELETE for users)
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Make actual DELETE request to DummyJSON API
+    const response = await api.delete(`/users/${id}`);
 
-    return { success: true };
+    // DummyJSON returns the deleted user data with isDeleted: true
+    console.log("Delete response:", response.data);
+
+    return {
+      success: true,
+      deletedUser: response.data,
+      message: `User ${response.data.firstName} ${response.data.lastName} deleted successfully`,
+    };
   } catch (error) {
-    throw new Error(`Failed to delete user: ${error.message}`);
+    if (error.response?.status === 404) {
+      throw new Error("User not found");
+    }
+    throw new Error(
+      `Failed to delete user: ${error.response?.data?.message || error.message}`
+    );
   }
 };
 
