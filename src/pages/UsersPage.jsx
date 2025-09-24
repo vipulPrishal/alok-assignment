@@ -2,57 +2,27 @@ import React, { useState } from "react";
 import UserTable from "../components/UserTable/UserTable";
 import SearchBar from "../components/SearchBar/SearchBar";
 import UserForm from "../components/UserForm/UserForm";
+import Pagination from "../components/Pagination/Pagination";
 import { useTheme } from "../contexts/ThemeContext";
+import { sampleUsers } from "../data/sampleUsers";
 
 const UsersPage = () => {
   const { isDark } = useTheme();
 
-  // Sample users data
-  const [allUsers, setAllUsers] = useState([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      department: "Engineering",
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      department: "Marketing",
-    },
-    {
-      id: 3,
-      firstName: "Mike",
-      lastName: "Johnson",
-      email: "mike.johnson@example.com",
-      department: "Sales",
-    },
-    {
-      id: 4,
-      firstName: "Sarah",
-      lastName: "Wilson",
-      email: "sarah.wilson@example.com",
-      department: "HR",
-    },
-    {
-      id: 5,
-      firstName: "David",
-      lastName: "Brown",
-      email: "david.brown@example.com",
-      department: "Finance",
-    },
-  ]);
-
-  const [filteredUsers, setFilteredUsers] = useState(allUsers);
+  // Use sample data with 100 users
+  const [allUsers, setAllUsers] = useState(sampleUsers);
+  const [filteredUsers, setFilteredUsers] = useState(sampleUsers);
   const [editingUser, setEditingUser] = useState(null);
   const [addingUser, setAddingUser] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredUsers(allUsers);
+      setCurrentPage(1);
       return;
     }
 
@@ -65,6 +35,7 @@ const UsersPage = () => {
     );
 
     setFilteredUsers(filtered);
+    setCurrentPage(1);
   };
 
   const handleSortByName = () => {
@@ -74,6 +45,7 @@ const UsersPage = () => {
       return nameA.localeCompare(nameB);
     });
     setFilteredUsers(sorted);
+    setCurrentPage(1);
   };
 
   const handleSortByEmail = () => {
@@ -81,6 +53,7 @@ const UsersPage = () => {
       return a.email.toLowerCase().localeCompare(b.email.toLowerCase());
     });
     setFilteredUsers(sorted);
+    setCurrentPage(1);
   };
 
   const handleSortByDepartment = () => {
@@ -90,6 +63,7 @@ const UsersPage = () => {
         .localeCompare(b.department.toLowerCase());
     });
     setFilteredUsers(sorted);
+    setCurrentPage(1);
   };
 
   const handleEdit = (user) => {
@@ -141,6 +115,21 @@ const UsersPage = () => {
       setFilteredUsers(updatedUsers);
     }
   };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -207,9 +196,19 @@ const UsersPage = () => {
         }`}
       >
         <UserTable
-          users={filteredUsers}
+          users={currentUsers}
           onEdit={handleEdit}
           onDelete={handleDelete}
+        />
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredUsers.length}
+          onItemsPerPageChange={handleItemsPerPageChange}
         />
       </div>
 
