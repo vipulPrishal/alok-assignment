@@ -11,43 +11,6 @@ const Pagination = ({
 }) => {
   const { isDark } = useTheme();
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const startPage = Math.max(
-        1,
-        currentPage - Math.floor(maxVisiblePages / 2)
-      );
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-      if (startPage > 1) {
-        pages.push(1);
-        if (startPage > 2) {
-          pages.push("...");
-        }
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-
-      if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-          pages.push("...");
-        }
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -58,13 +21,8 @@ const Pagination = ({
       }`}
     >
       <div className="flex items-center justify-between w-full">
-        {/* Items per page selector */}
+        {/* Items per page selector - Mobile friendly */}
         <div className="flex items-center space-x-2">
-          <span
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
-          >
-            Show
-          </span>
           <select
             value={itemsPerPage}
             onChange={(e) => onItemsPerPageChange(parseInt(e.target.value))}
@@ -79,21 +37,9 @@ const Pagination = ({
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <span
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
-          >
-            per page
-          </span>
         </div>
 
-        {/* Page info */}
-        <div
-          className={`text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
-        >
-          Showing {startItem} to {endItem} of {totalItems} results
-        </div>
-
-        {/* Pagination controls */}
+        {/* Simple pagination controls - Mobile friendly */}
         <div className="flex items-center space-x-1">
           {/* Previous button */}
           <button
@@ -113,34 +59,17 @@ const Pagination = ({
                   }`
             }`}
           >
-            Previous
+            Prev
           </button>
 
-          {/* Page numbers */}
-          {getPageNumbers().map((page, index) => (
-            <button
-              key={index}
-              onClick={() => typeof page === "number" && onPageChange(page)}
-              disabled={page === "..."}
-              className={`px-3 py-1 text-sm border rounded ${
-                page === currentPage
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : page === "..."
-                  ? `${
-                      isDark
-                        ? "bg-gray-700 text-gray-500 border-gray-600 cursor-default"
-                        : "bg-white text-gray-400 border-gray-200 cursor-default"
-                    }`
-                  : `${
-                      isDark
-                        ? "bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                    }`
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          {/* Current page info */}
+          <span
+            className={`px-3 py-1 text-sm ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            {currentPage} / {totalPages}
+          </span>
 
           {/* Next button */}
           <button
