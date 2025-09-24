@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UserTable from "../components/UserTable/UserTable";
 import SearchBar from "../components/SearchBar/SearchBar";
+import UserForm from "../components/UserForm/UserForm";
 import { useTheme } from "../contexts/ThemeContext";
 
 const UsersPage = () => {
@@ -46,6 +47,8 @@ const UsersPage = () => {
   ]);
 
   const [filteredUsers, setFilteredUsers] = useState(allUsers);
+  const [editingUser, setEditingUser] = useState(null);
+  const [addingUser, setAddingUser] = useState(false);
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -65,8 +68,45 @@ const UsersPage = () => {
   };
 
   const handleEdit = (user) => {
-    console.log("Edit user:", user);
-    // TODO: Implement edit functionality
+    setEditingUser(user);
+    setAddingUser(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+  };
+
+  const handleUpdateUser = (updatedUserData) => {
+    const updatedUsers = allUsers.map((user) =>
+      user.id === editingUser.id ? { ...user, ...updatedUserData } : user
+    );
+    setAllUsers(updatedUsers);
+    setFilteredUsers(updatedUsers);
+    setEditingUser(null);
+  };
+
+  const handleAddUser = () => {
+    setAddingUser(true);
+    setEditingUser(null);
+  };
+
+  const handleCancelAdd = () => {
+    setAddingUser(false);
+  };
+
+  const handleCreateUser = (newUserData) => {
+    // Generate new ID (highest existing ID + 1)
+    const newId = Math.max(...allUsers.map((user) => user.id)) + 1;
+
+    const newUser = {
+      id: newId,
+      ...newUserData,
+    };
+
+    const updatedUsers = [...allUsers, newUser];
+    setAllUsers(updatedUsers);
+    setFilteredUsers(updatedUsers);
+    setAddingUser(false);
   };
 
   const handleDelete = (userId) => {
@@ -75,11 +115,6 @@ const UsersPage = () => {
       setAllUsers(updatedUsers);
       setFilteredUsers(updatedUsers);
     }
-  };
-
-  const handleAddUser = () => {
-    console.log("Add new user");
-    // TODO: Implement add user functionality
   };
 
   return (
@@ -117,6 +152,28 @@ const UsersPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Add User Form */}
+      {addingUser && (
+        <div className="mb-6">
+          <UserForm
+            user={null}
+            onSubmit={handleCreateUser}
+            onCancel={handleCancelAdd}
+          />
+        </div>
+      )}
+
+      {/* Edit User Form */}
+      {editingUser && (
+        <div className="mb-6">
+          <UserForm
+            user={editingUser}
+            onSubmit={handleUpdateUser}
+            onCancel={handleCancelEdit}
+          />
+        </div>
+      )}
 
       {/* User Table */}
       <div
