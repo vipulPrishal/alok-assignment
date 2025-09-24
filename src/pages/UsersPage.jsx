@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import UserTable from "../components/UserTable/UserTable";
 import SearchBar from "../components/SearchBar/SearchBar";
+import { useTheme } from "../contexts/ThemeContext";
 
 const UsersPage = () => {
+  const { isDark } = useTheme();
+
   // Sample users data
   const [allUsers, setAllUsers] = useState([
     {
@@ -82,16 +85,24 @@ const UsersPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+        <h1
+          className={`text-2xl md:text-3xl font-bold mb-2 ${
+            isDark ? "text-white" : "text-gray-800"
+          }`}
+        >
           User Management
         </h1>
-        <p className="text-gray-600">
+        <p className={`${isDark ? "text-gray-300" : "text-gray-600"}`}>
           Manage your users with full CRUD operations
         </p>
       </div>
 
       {/* Search and Add User Section */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div
+        className={`p-4 rounded-lg shadow-sm border mb-6 ${
+          isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        }`}
+      >
         <div className="flex items-center space-x-4">
           <SearchBar
             onSearch={handleSearch}
@@ -108,7 +119,11 @@ const UsersPage = () => {
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div
+        className={`rounded-lg shadow-sm border overflow-hidden ${
+          isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        }`}
+      >
         <UserTable
           users={filteredUsers}
           onEdit={handleEdit}

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const SearchBar = ({ onSearch, placeholder = "Search users..." }) => {
+  const { isDark } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSubmit = (e) => {
@@ -36,7 +38,11 @@ const SearchBar = ({ onSearch, placeholder = "Search users..." }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={placeholder}
-          className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className={`block w-full pl-10 pr-10 py-2 border rounded-md leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+            isDark
+              ? "bg-gray-700 border-gray-600 text-white"
+              : "bg-white border-gray-300 text-gray-900"
+          }`}
         />
         {searchTerm && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">

@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const NavBar = () => {
-  const [isDark, setIsDark] = useState(false);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <nav
