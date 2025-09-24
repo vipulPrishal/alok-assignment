@@ -67,6 +67,31 @@ const UsersPage = () => {
     setFilteredUsers(filtered);
   };
 
+  const handleSortByName = () => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+    setFilteredUsers(sorted);
+  };
+
+  const handleSortByEmail = () => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      return a.email.toLowerCase().localeCompare(b.email.toLowerCase());
+    });
+    setFilteredUsers(sorted);
+  };
+
+  const handleSortByDepartment = () => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      return a.department
+        .toLowerCase()
+        .localeCompare(b.department.toLowerCase());
+    });
+    setFilteredUsers(sorted);
+  };
+
   const handleEdit = (user) => {
     setEditingUser(user);
     setAddingUser(false);
@@ -177,7 +202,7 @@ const UsersPage = () => {
 
       {/* User Table */}
       <div
-        className={`rounded-lg shadow-sm border overflow-hidden ${
+        className={`rounded-lg shadow-sm border overflow-hidden mb-6 ${
           isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         }`}
       >
@@ -186,6 +211,34 @@ const UsersPage = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
+      </div>
+
+      {/* Sort Buttons */}
+      <div
+        className={`p-4 rounded-lg shadow-sm border ${
+          isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleSortByName}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+          >
+            Sort by Name
+          </button>
+          <button
+            onClick={handleSortByEmail}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-200"
+          >
+            Sort by Email
+          </button>
+          <button
+            onClick={handleSortByDepartment}
+            className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200"
+          >
+            Sort by Department
+          </button>
+        </div>
       </div>
     </div>
   );
