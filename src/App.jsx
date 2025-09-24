@@ -2,6 +2,7 @@ import React from "react";
 import NavBar from "./components/NavBar/NavBar";
 import UsersPage from "./pages/UsersPage";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { ToastProvider } from "./contexts/ToastContext";
 
 const AppContent = () => {
   const { isDark } = useTheme();
@@ -17,7 +18,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <ThemeProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </ThemeProvider>
   );
 };

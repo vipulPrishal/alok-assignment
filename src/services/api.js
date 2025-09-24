@@ -1,8 +1,8 @@
-// API service for user management using JSONPlaceholder
+// API service for user management using DummyJSON
 import axios from "axios";
 
-// Base URL for JSONPlaceholder API
-const API_BASE_URL = "https://jsonplaceholder.typicode.com";
+// Base URL for DummyJSON API
+const API_BASE_URL = "https://dummyjson.com";
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -37,42 +37,19 @@ api.interceptors.response.use(
   }
 );
 
-// Note: JSONPlaceholder doesn't persist changes, so we'll maintain local state for CRUD operations
-// This simulates a real backend by maintaining state locally
-
-// Local state to track changes (since JSONPlaceholder doesn't persist)
-let localUsers = null;
-let nextId = 1000; // Start from 1000 to avoid conflicts with JSONPlaceholder IDs
-
-// Helper function to assign department based on email domain or name
-const getDepartmentFromEmail = (email) => {
-  const departments = ["Engineering", "Marketing", "Sales", "HR", "Finance"];
-  // Simple hash-based assignment for consistency
-  const hash = email.split("").reduce((a, b) => {
-    a = (a << 5) - a + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  return departments[Math.abs(hash) % departments.length];
-};
-
 // API functions
-export const getUsers = async () => {
+export const getUsers = async (limit = 100, skip = 0) => {
   try {
-    // If we haven't loaded users yet, fetch from JSONPlaceholder
-    if (!localUsers) {
-      const response = await api.get("/users");
-      // Transform JSONPlaceholder data to match our structure
-      localUsers = response.data.map((user) => ({
-        id: user.id,
-        firstName: user.name.split(" ")[0],
-        lastName: user.name.split(" ").slice(1).join(" "),
-        email: user.email,
-        department: getDepartmentFromEmail(user.email), // Helper function to assign department
-      }));
-    }
-
-    // Return the current state (original + local changes)
-    return [...localUsers];
+    const response = await api.get(`/users?limit=${limit}&skip=${skip}`);
+    // Transform DummyJSON data to match our structure
+    const users = response.data.users.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      department: user.company?.department || "General", // Use company department or default
+    }));
+    return users;
   } catch (error) {
     throw new Error(
       `Failed to fetch users: ${error.response?.data?.message || error.message}`
@@ -82,23 +59,14 @@ export const getUsers = async () => {
 
 export const getUser = async (id) => {
   try {
-    // First check if we have local users loaded
-    if (localUsers) {
-      const user = localUsers.find((u) => u.id === parseInt(id));
-      if (user) {
-        return { ...user };
-      }
-    }
-
-    // If not found locally, try to fetch from JSONPlaceholder
     const response = await api.get(`/users/${id}`);
     const user = response.data;
     return {
       id: user.id,
-      firstName: user.name.split(" ")[0],
-      lastName: user.name.split(" ").slice(1).join(" "),
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
-      department: getDepartmentFromEmail(user.email),
+      department: user.company?.department || "General",
     };
   } catch (error) {
     if (error.response?.status === 404) {
@@ -130,31 +98,17 @@ export const createUser = async (userData) => {
       throw new Error("Please enter a valid email address");
     }
 
-    // Check if email already exists in local state
-    if (localUsers) {
-      const existingUser = localUsers.find((u) => u.email === userData.email);
-      if (existingUser) {
-        throw new Error("Email already exists");
-      }
-    }
-
-    // Simulate API call (JSONPlaceholder won't actually persist)
+    // Simulate API call (DummyJSON doesn't support POST for users)
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Create new user with local ID
+    // Create new user with local ID (since DummyJSON doesn't persist)
     const newUser = {
-      id: nextId++,
+      id: Date.now(), // Use timestamp as ID
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
       department: userData.department,
     };
-
-    // Add to local state
-    if (!localUsers) {
-      localUsers = [];
-    }
-    localUsers.push(newUser);
 
     return { ...newUser };
   } catch (error) {
@@ -182,37 +136,17 @@ export const updateUser = async (id, userData) => {
       throw new Error("Please enter a valid email address");
     }
 
-    // Find user in local state
-    if (!localUsers) {
-      throw new Error("User not found");
-    }
-
-    const userIndex = localUsers.findIndex((u) => u.id === parseInt(id));
-    if (userIndex === -1) {
-      throw new Error("User not found");
-    }
-
-    // Check if email already exists (excluding current user)
-    const existingUser = localUsers.find(
-      (u) => u.email === userData.email && u.id !== parseInt(id)
-    );
-    if (existingUser) {
-      throw new Error("Email already exists");
-    }
-
-    // Simulate API call
+    // Simulate API call (DummyJSON doesn't support PUT for users)
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Update user in local state
+    // Return updated user data
     const updatedUser = {
-      ...localUsers[userIndex],
+      id: parseInt(id),
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
       department: userData.department,
     };
-
-    localUsers[userIndex] = updatedUser;
 
     return { ...updatedUser };
   } catch (error) {
@@ -222,21 +156,8 @@ export const updateUser = async (id, userData) => {
 
 export const deleteUser = async (id) => {
   try {
-    // Find user in local state
-    if (!localUsers) {
-      throw new Error("User not found");
-    }
-
-    const userIndex = localUsers.findIndex((u) => u.id === parseInt(id));
-    if (userIndex === -1) {
-      throw new Error("User not found");
-    }
-
-    // Simulate API call
+    // Simulate API call (DummyJSON doesn't support DELETE for users)
     await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Remove user from local state
-    localUsers.splice(userIndex, 1);
 
     return { success: true };
   } catch (error) {
@@ -244,7 +165,7 @@ export const deleteUser = async (id) => {
   }
 };
 
-// Search users (client-side filtering since JSONPlaceholder doesn't support search)
+// Search users (client-side filtering since DummyJSON doesn't support search)
 export const searchUsers = async (query) => {
   try {
     const allUsers = await getUsers();

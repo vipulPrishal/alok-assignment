@@ -1,23 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import UserTable from "../components/UserTable/UserTable";
 import SearchBar from "../components/SearchBar/SearchBar";
 import UserForm from "../components/UserForm/UserForm";
 import Pagination from "../components/Pagination/Pagination";
 import { useTheme } from "../contexts/ThemeContext";
-import { sampleUsers } from "../data/sampleUsers";
+import { useToast } from "../contexts/ToastContext";
+import { getUsers, createUser, updateUser, deleteUser } from "../services/api";
+// import { sampleUsers } from "../data/sampleUsers"; // Commented out - using API data now
 
 const UsersPage = () => {
   const { isDark } = useTheme();
+  const { showSuccess, showError, showWarning } = useToast();
 
-  // Use sample data with 100 users
-  const [allUsers, setAllUsers] = useState(sampleUsers);
-  const [filteredUsers, setFilteredUsers] = useState(sampleUsers);
+  // State for API data
+  const [allUsers, setAllUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [addingUser, setAddingUser] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Fetch users from API on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const users = await getUsers(100, 0); // Get 100 users from API
+      setAllUsers(users);
+      setFilteredUsers(users);
+    } catch (err) {
+      setError(err.message);
+      showError(err.message);
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -75,13 +101,21 @@ const UsersPage = () => {
     setEditingUser(null);
   };
 
-  const handleUpdateUser = (updatedUserData) => {
-    const updatedUsers = allUsers.map((user) =>
-      user.id === editingUser.id ? { ...user, ...updatedUserData } : user
-    );
-    setAllUsers(updatedUsers);
-    setFilteredUsers(updatedUsers);
-    setEditingUser(null);
+  const handleUpdateUser = async (updatedUserData) => {
+    try {
+      await updateUser(editingUser.id, updatedUserData);
+      const updatedUsers = allUsers.map((user) =>
+        user.id === editingUser.id ? { ...user, ...updatedUserData } : user
+      );
+      setAllUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
+      setEditingUser(null);
+      showWarning("User Data Updated");
+    } catch (err) {
+      console.error("Error updating user:", err);
+      setError(err.message);
+      showError(err.message);
+    }
   };
 
   const handleAddUser = () => {
@@ -93,26 +127,34 @@ const UsersPage = () => {
     setAddingUser(false);
   };
 
-  const handleCreateUser = (newUserData) => {
-    // Generate new ID (highest existing ID + 1)
-    const newId = Math.max(...allUsers.map((user) => user.id)) + 1;
-
-    const newUser = {
-      id: newId,
-      ...newUserData,
-    };
-
-    const updatedUsers = [...allUsers, newUser];
-    setAllUsers(updatedUsers);
-    setFilteredUsers(updatedUsers);
-    setAddingUser(false);
-  };
-
-  const handleDelete = (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      const updatedUsers = allUsers.filter((user) => user.id !== userId);
+  const handleCreateUser = async (newUserData) => {
+    try {
+      const newUser = await createUser(newUserData);
+      const updatedUsers = [...allUsers, newUser];
       setAllUsers(updatedUsers);
       setFilteredUsers(updatedUsers);
+      setAddingUser(false);
+      showSuccess("User Data Added");
+    } catch (err) {
+      console.error("Error creating user:", err);
+      setError(err.message);
+      showError(err.message);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await deleteUser(userId);
+        const updatedUsers = allUsers.filter((user) => user.id !== userId);
+        setAllUsers(updatedUsers);
+        setFilteredUsers(updatedUsers);
+        showError("User Data Deleted");
+      } catch (err) {
+        console.error("Error deleting user:", err);
+        setError(err.message);
+        showError(err.message);
+      }
     }
   };
 
@@ -131,6 +173,18 @@ const UsersPage = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className={`text-lg ${isDark ? "text-white" : "text-gray-600"}`}>
+            Loading users...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -145,6 +199,12 @@ const UsersPage = () => {
           Manage your users with full CRUD operations
         </p>
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
       {/* Search and Add User Section */}
       <div
