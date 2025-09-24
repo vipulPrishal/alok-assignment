@@ -38,6 +38,12 @@ const SearchBar = ({ onSearch, placeholder = "Search users..." }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onSearch(searchTerm);
+              }
+            }}
             placeholder={placeholder}
             className={`block w-full pl-10 pr-10 py-2 border rounded-md leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               isDark
@@ -71,7 +77,7 @@ const SearchBar = ({ onSearch, placeholder = "Search users..." }) => {
         </div>
       </form>
       <button
-        type="submit"
+        type="button"
         onClick={handleSubmit}
         className="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 whitespace-nowrap"
       >

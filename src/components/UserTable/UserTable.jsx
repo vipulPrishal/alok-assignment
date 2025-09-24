@@ -7,7 +7,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
   return (
     <>
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto hide-scrollbar">
         <table
           className={`min-w-full border ${
             isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
