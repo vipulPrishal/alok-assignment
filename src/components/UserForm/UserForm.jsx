@@ -74,8 +74,8 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+    <div className="max-w-md mx-auto bg-white p-4 md:p-6 rounded-lg shadow-md">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-800">
         {user ? "Edit User" : "Add New User"}
       </h2>
 
@@ -181,7 +181,7 @@ const UserForm = ({ user, onSubmit, onCancel }) => {
           )}
         </div>
 
-        <div className="flex space-x-4 pt-4">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
           <button
             type="submit"
             className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200"
